@@ -14,7 +14,15 @@ type MysqlConfig struct {
 	DBName   string `json:"db_name"`
 }
 
-func WithClient(conf MysqlConfig, hand func(db *gorm.DB) error) error {
+func WithClient(hand func(db *gorm.DB) error) error {
+	conf := MysqlConfig{
+		User:     "root",
+		Password: "",
+		Host:     "127.0.0.1",
+		Port:     3306,
+		DBName:   "test",
+	}
+
 	dsn := fmt.Sprintf(
 		"%v:%v@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local",
 		conf.User,
