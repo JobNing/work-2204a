@@ -1,0 +1,36 @@
+package mysql
+
+import (
+	"fmt"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
+
+type MysqlConfig struct {
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	DBName   string `json:"db_name"`
+}
+
+func WithClient(conf MysqlConfig, hand func(db *gorm.DB) error) error {
+	dsn := fmt.Sprintf(
+		"%v:%v@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local",
+		conf.User,
+		conf.Password,
+		conf.Host,
+		conf.Port,
+		conf.DBName,
+	)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		dd, _ := db.DB()
+		dd.Close()
+	}()
+	return hand(db)
+}
