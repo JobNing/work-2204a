@@ -42,3 +42,15 @@ func WithClient(hand func(db *gorm.DB) error) error {
 	}()
 	return hand(db)
 }
+
+func WithTx(hand func(db *gorm.DB) error) error {
+	return WithClient(func(db *gorm.DB) error {
+		tx := db.Begin()
+		err := hand(tx)
+		if err != nil {
+			tx.Rollback()
+		}
+		tx.Commit()
+		return nil
+	})
+}
